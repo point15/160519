@@ -1,0 +1,320 @@
+using System;
+
+using System.Collections.Generic;
+
+using System.ComponentModel;
+
+using System.Data;
+
+using System.Drawing;
+
+using System.Linq;
+
+using System.Text;
+
+using System.Windows.Forms;
+
+using System.IO;
+
+namespace WindowsFormsApp1
+
+{
+
+public partial class Form1 : Form
+
+{
+
+public Form1()
+
+{
+
+InitializeComponent();
+
+}
+
+private void Form1_Load(object sender, EventArgs e)
+
+{
+
+int N = 100, time = 100, tau, u0 = 90, rojam = 120;
+
+double h, a = 1, k1=100;
+
+double[] x = new double[101];
+
+double[] ro = new double[101];
+
+double[] ron = new double[101];
+
+double[] rop = new double[101];
+
+double[] u = new double[101];
+
+double[] un = new double[101];
+
+double[] q = new double[101];
+
+double[] qn = new double[101];
+
+double[] qp = new double[101];
+
+h = 1 / Convert.ToDouble(N);
+
+listBox2.Items.Clear();
+
+double t = 0.01*h;
+
+// Console.WriteLine(t.ToString(System.Globalization.CultureInfo.GetCultureInfo("en_US")));
+
+System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+
+x[0] = 0;
+
+　
+
+　
+
+　
+
+listBox1.Items.Clear();
+
+string fileName1 = "out1.txt";
+
+FileStream aFile1 = new FileStream(fileName1, FileMode.OpenOrCreate);
+
+StreamWriter sw1 = new StreamWriter(aFile1);
+
+aFile1.Seek(0, SeekOrigin.End);
+
+for (int i = 1; i <= N; i++)
+
+{
+
+x[i] = x[i - 1] + h;
+
+sw1.WriteLine(Convert.ToString(x[i]), " ");
+
+listBox1.Items.Add(x[i]);
+
+}
+
+for (int i = 1; i < N; i++)
+
+{
+
+ro[i] = 30;
+
+if (x[i] > 0.3 & x[i] < 0.7)
+
+{
+
+ro[i] = 80;
+
+}
+
+}
+
+ro[0] = ro[1];
+
+ro[N] = ro[N - 1];
+
+tau = 0;
+
+for(int i=0;i<=N;i++)
+
+{
+
+u[i] = u0 * (1 - ro[i] / rojam);
+
+q[i] = ro[i] * u[i];
+
+// listBox2.Items.Add(q[i]);
+
+}
+
+//-------------computations----------------------------------—
+
+　
+
+　
+
+while (tau < time)
+
+{
+
+tau = tau + 1;
+
+　
+
+　
+
+　
+
+for (int i = 1; i < N; i++)
+
+//Nt = Nt + 1;
+
+{
+
+rop[i] = ro[i] - t / h * (q[i+1] - q[i]) + k1*(ro[i+1]-2*ro[i]+ro[i-1])/(h*h);
+
+qp[i] = rop[i] * u0 * (1 - rop[i] /Convert.ToDouble(rojam));
+
+listBox2.Items.Add(rop[i]);
+
+}
+
+　
+
+rop[0] = rop[1];
+
+rop[N] = rop[N - 1];
+
+qp[0] = qp[1];
+
+qp[N] = qp[N - 1];
+
+for (int i = 1; i < N; i++)
+
+//Nt = Nt + 1;
+
+{
+
+ron[i] = 0.5 * (ro[i] + rop[i]) - t / (2 * h) * (qp[i] - qp[i - 1]) + k1 * (rop[i + 1] - 2 * rop[i] + rop[i - 1]) / (h * h);
+
+qn[i] = ron[i] *Convert.ToDouble(u0) * (1 - ron[i] /Convert.ToDouble(rojam));
+
+// listBox2.Items.Add(ro[i]);
+
+}
+
+　
+
+ron[0] = ron[1];
+
+ron[N] = ron[N - 1];
+
+qn[0] = qn[1];
+
+qn[N] = qn[N - 1];
+
+{
+
+//string fileName = @"D:/МАДИ-студенты/СТУДЕНТЫ-2018/АНДРЕЕВА/МАША/FILE_" + tau + ".dat";
+
+string fileName = @"D:/MARINA_MAIN_DIR/МАДИ_Кафедра/ЛАВРОВ/WindowsFormsApp5/123/File_" + tau + ".dat";
+
+if (tau < 10)
+
+{
+
+fileName = @"D:/MARINA_MAIN_DIR/МАДИ_Кафедра/ЛАВРОВ/WindowsFormsApp5/123/File_" + "000" + tau + ".dat";
+
+}
+
+else if (tau < 100)
+
+{
+
+fileName = @"D:/MARINA_MAIN_DIR/МАДИ_Кафедра/ЛАВРОВ/WindowsFormsApp5/123/File_" + "00" + tau + ".dat";
+
+}
+
+else if (tau < 1000)
+
+{
+
+fileName = @"D:/MARINA_MAIN_DIR/МАДИ_Кафедра/ЛАВРОВ/WindowsFormsApp5/123/File_" + "0" + tau + ".dat";
+
+}
+
+else
+
+{
+
+fileName = @"D:/MARINA_MAIN_DIR/МАДИ_Кафедра/ЛАВРОВ/WindowsFormsApp5/123/File_" + tau + ".dat";
+
+}
+
+FileStream aFile = new FileStream(fileName, FileMode.OpenOrCreate);
+
+StreamWriter sw = new StreamWriter(aFile);
+
+aFile.Seek(0, SeekOrigin.End);
+
+　
+
+　
+
+//sw.WriteLine(Convert.ToString(ro[i]), " ");
+
+//fout_U « "TITLE = \"Function\" \n" « "VARIABLES = \"X\",\"U\" \n" « "ZONE T = \"BIG ZONE\", I = " « N « ", F = POINT \n";
+
+int k = N + 1;
+
+sw.Write("TITLE = \"Function\" \n");
+
+sw.Write("VARIABLES = \"X\",\"U\", \n");
+
+sw.Write("ZONE T = \"BIG ZONE\", I = " + k);
+
+sw.Write(", F = POINT \n");
+
+
+sw.WriteLine();
+
+for (int i = 0; i <= N; i++)
+
+{
+
+sw.Write(x[i] + " " + ro[i]);
+
+sw.WriteLine();
+
+}
+
+// }
+
+sw.Close();
+
+}
+
+for (int i = 0; i <= N; i++)
+
+{
+
+ro[i] = ron[i];
+
+q[i] = qn[i];
+
+}
+
+// }
+
+}
+
+//-------—
+
+　
+
+　
+
+　
+
+　
+
+　
+
+　
+
+　
+
+　
+
+　
+
+}
+
+}
+
+}
